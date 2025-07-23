@@ -1,0 +1,238 @@
+/* Tipografia escrita à mão */
+@import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
+body {
+  background-color: #fef7ed;
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-repeat: repeat;
+  color: #111;
+  font-family: 'Architects Daughter', cursive;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 30px;
+  margin: 0;
+  min-height: 100vh;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  /* border-bottom: 2px solid #111; */
+  padding-bottom: 5px;
+  width: 100%;
+  max-width: 300px;
+}
+
+p.description {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.1rem;
+  color: #222;
+  margin: 12px 0 24px;
+  max-width: 600px;
+  line-height: 1.6;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.progress-wrapper {
+  width: 300px;
+  margin-bottom: 20px;
+}
+
+#progressContainer {
+  position: relative;
+  background-color: #cfcfcf;
+  border: 2px solid #111;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#intelligenceBar {
+  height: 100%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  line-height: 24px;
+  font-size: 0.9rem;
+  width: 10%;
+  transition: width 0.3s ease;
+  padding-left: 6px;
+  padding-right: 24px; /* espaço reservado para a imagem */
+  box-sizing: border-box;
+}
+
+#resetLearningBtn {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  cursor: default !important;
+  transition: none !important;
+  pointer-events: auto;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background-color: #fff;
+  border: 3px solid #000;
+  font-size: 2.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.cell:hover {
+  transform: scale(1.05);
+}
+
+#message {
+  font-size: 1.5rem;
+  margin: 15px 0;
+  color: #000;
+  font-weight: bold;
+}
+
+#resetBtn {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #000;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Architects Daughter', cursive;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+#resetBtn:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+#chartContainer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  background-color: #fafafa;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 10px;
+  border: none; /* <- Remova a borda */
+  border-radius: 12px;
+  padding: 0 20px;
+}
+
+#chartContainer.show {
+  max-height: 800px;
+  padding: 20px;
+  border: 2px solid #111; /* <- Ativa borda só quando expandido */
+}
+
+/* Animação opcional */
+.neuron-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: #000;
+  border-radius: 50%;
+  opacity: 0;
+  animation: burstOut 0.6s ease-out forwards;
+}
+
+@keyframes burstOut {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  #board {
+    grid-template-columns: repeat(3, 22vw);
+    gap: 3vw;
+  }
+
+  .cell {
+    width: 22vw;
+    height: 22vw;
+    font-size: 2rem;
+  }
+
+  #resetBtn {
+    width: 80%;
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+    #chartContainer {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    border-radius: 0;
+    max-height: 0;
+  }
+
+  #chartContainer.show {
+    padding: 20px;
+    border: 2px solid #111;
+    background-color: #fafafa;
+    border-radius: 12px;
+    max-height: 800px;
+  }
+
+  #message {
+    font-size: 1.2rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    border-bottom: none
+  }
+
+  p.description {
+    font-size: 0.95rem;
+    padding: 0 10px;
+  }
+}
+
+#toggleChart {
+  margin-top: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.3s ease;
+}
+
+#arrowIcon.rotated {
+  transform: rotate(180deg);
+}
