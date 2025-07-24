@@ -22,7 +22,6 @@ h1 {
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  /* border-bottom: 2px solid #111; */
   padding-bottom: 5px;
   width: 100%;
   max-width: 300px;
@@ -116,6 +115,7 @@ p.description {
   font-weight: bold;
 }
 
+/* Botão de Jogar revertido ao estado original */
 #resetBtn {
   background-color: #fff;
   color: #000;
@@ -141,7 +141,7 @@ p.description {
   width: 100%;
   max-width: 600px;
   margin-top: 10px;
-  border: none; /* <- Remova a borda */
+  border: none;
   border-radius: 12px;
   padding: 0 20px;
 }
@@ -149,7 +149,7 @@ p.description {
 #chartContainer.show {
   max-height: 800px;
   padding: 20px;
-  border: 2px solid #111; /* <- Ativa borda só quando expandido */
+  border: 2px solid #111;
 }
 
 /* Animação opcional */
@@ -194,7 +194,7 @@ p.description {
     padding: 10px;
   }
 
-    #chartContainer {
+  #chartContainer {
     padding: 0;
     border: none;
     background-color: transparent;
@@ -224,13 +224,31 @@ p.description {
     padding: 0 10px;
   }
 }
+/* Estilo para o texto de "ver estatísticas" */
+#statsText {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 0.7rem;
+  color: #555;
+  margin-top: -5px;
+  margin-bottom: 15px;
+  letter-spacing: 0.5px;
+  cursor: default;
+}
+
+/* --- EFEITO DE HOVER PARA O ÍCONE DO GRÁFICO --- */
 
 #toggleChart {
   margin-top: 10px;
   font-size: 24px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.3s ease;
+  /* A transição agora suaviza a opacidade e o tamanho */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#toggleChart:hover {
+  opacity: 0.6; /* Fica mais transparente ao passar o mouse */
+  transform: scale(1.1); /* Aumenta um pouco para dar feedback */
 }
 
 #arrowIcon.rotated {

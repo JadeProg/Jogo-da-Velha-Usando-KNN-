@@ -97,15 +97,15 @@ function updateProgress() {
 
   const feedback = document.getElementById('message');
   if (aprendizado < 30) {
-    feedback.textContent = "Você está jogando contra uma IA leiga.";
+    feedback.textContent = "Vovó é leiga.";
   } else if (aprendizado < 50) {
-    feedback.textContent = "A IA está começando a entender seus padrões...";
+    feedback.textContent = "Vovó está começando a entender seus padrões...";
   } else if (aprendizado < 75) {
     feedback.textContent = "Ela já consegue antecipar seus movimentos.";
   } else if (aprendizado < 100) {
-    feedback.textContent = "Agora ela joga como um profissional!";
+    feedback.textContent = "Quase uma profissional!";
   } else {
-    feedback.textContent = "Agora você está jogando contra um mestre do jogo da velha.";
+    feedback.textContent = "Duvido você ganhar...";
   }
 }
 
@@ -127,7 +127,7 @@ function makeMove(index) {
     movimentosDaPartida++;
     updateProgress();
     renderBoard();
-    if (checkWin(-1)) return endGame('A IA venceu!');
+    if (checkWin(-1)) return endGame('Vovó venceu!');
     if (board.every(v => v !== 0)) return endGame('Empate!');
   }, 500);
 }
@@ -136,23 +136,48 @@ function checkWin(player) {
   return winningCombos.some(combo => combo.every(i => board[i] === player));
 }
 
+function fazerScrollParaOBotao() {
+  const botaoJogar = document.getElementById('resetBtn');
+
+  // Rola a tela suavemente até o botão
+  if (botaoJogar) {
+    // Usamos um pequeno timeout para garantir que o botão já está visível na tela
+    setTimeout(() => {
+      botaoJogar.scrollIntoView({
+        behavior: 'smooth', // Animação de rolagem
+        block: 'center'     // Alinha o botão ao centro
+      });
+    }, 100); // 100 milissegundos de espera
+  }
+}
+
 function endGame(message) {
   document.getElementById('message').textContent = message;
   document.querySelectorAll('.cell').forEach(cell => cell.onclick = null);
   document.getElementById('resetBtn').style.display = 'inline-block';
   document.getElementById('resetLearningBtn').style.display = 'inline-block';
   document.getElementById('toggleChart').style.display = 'block';
+  
+  // --- Adicione o código para o texto aqui ---
+  const statsText = document.getElementById('statsText'); 
+  if (statsText) {                                        
+    statsText.style.display = 'block';                    
+  }                                                      
+  // ---------------------------------------------
+
   gerarGraficoIA();
   movimentosDaPartida = 0;
 
   const imgIA = document.getElementById('velhinha');
   if (message.includes("Você venceu!")) {
     imgIA.src = "velhinhaperde.png";
-  } else if (message.includes("A IA venceu")) {
+  } else if (message.includes("Vovó venceu!")) {
     imgIA.src = "velhinhaganha.png";
   } else {
     imgIA.src = "velhinha.png";
   }
+
+  fazerScrollParaOBotao(); 
 }
 
 function resetGame() {
@@ -165,6 +190,12 @@ function resetGame() {
   document.getElementById('toggleChart').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
   document.getElementById('resetLearningBtn').style.display = 'none';
+
+  const statsText = document.getElementById('statsText'); 
+  if (statsText) {                                        
+    statsText.style.display = 'none';                     
+  }                                                       
+
   renderBoard();
 }
 
