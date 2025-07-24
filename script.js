@@ -1,16 +1,16 @@
 const winningCombos = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6],
 ];
 
 let board = Array(9).fill(0);
-let jogadasIA = JSON.parse(localStorage.getItem("knn_dataset")) || [];
-let historicoProgresso = JSON.parse(localStorage.getItem("knn_progresso")) || [];
+let aiMoves = JSON.parse(localStorage.getItem("knn_dataset")) || [];
+let progressHistory = JSON.parse(localStorage.getItem("knn_progresso")) || [];
 let chartInstance = null;
-let movimentosDaPartida = 0;
-let aprendizado = 0;
-let jogadasDaIAPartida = [];
+let movesThisGame = 0;
+let learningLevel = 0;
+let aiMovesThisGame = [];
 
 function euclideanDistance(a, b) {
   return Math.sqrt(a.reduce((sum, val, i) => sum + (val - b[i]) ** 2, 0));
@@ -18,9 +18,9 @@ function euclideanDistance(a, b) {
 
 function checkThreat(board, player) {
   for (const combo of winningCombos) {
-    const values = combo.map(i => board[i]);
-    const empty = combo.filter(i => board[i] === 0);
-    if (values.filter(v => v === player).length === 2 && empty.length === 1) {
+    const values = combo.map((i) => board[i]);
+    const empty = combo.filter((i) => board[i] === 0);
+    if (values.filter((v) => v === player).length === 2 && empty.length === 1) {
       return empty[0];
     }
   }
@@ -28,40 +28,40 @@ function checkThreat(board, player) {
 }
 
 function getBestMove(board, k = 3) {
-  const isFirstPlay = board.filter(v => v !== 0).length === 1;
-  if (isFirstPlay && board[4] === 0 && aprendizado >= 100) return 4;
+  const isFirstPlay = board.filter((v) => v !== 0).length === 1;
+  if (isFirstPlay && board[4] === 0 && learningLevel >= 100) return 4;
 
-  if (aprendizado >= 100) {
+  if (learningLevel >= 100) {
     const winMove = checkThreat(board, -1);
     if (winMove !== null) return winMove;
     const blockMove = checkThreat(board, 1);
     if (blockMove !== null) return blockMove;
     if (board[4] === 0) return 4;
-    const corners = [0, 2, 6, 8].filter(i => board[i] === 0);
+    const corners = [0, 2, 6, 8].filter((i) => board[i] === 0);
     if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
   }
 
-  if (jogadasIA.length >= 5) {
+  if (aiMoves.length >= 5) {
     const block = checkThreat(board, 1);
     if (block !== null) return block;
   }
 
-  if (jogadasIA.length < 5) {
-    const empty = board.map((v, i) => v === 0 ? i : -1).filter(i => i !== -1);
+  if (aiMoves.length < 5) {
+    const empty = board.map((v, i) => (v === 0 ? i : -1)).filter((i) => i !== -1);
     return empty[Math.floor(Math.random() * empty.length)];
   }
 
-  const distances = jogadasIA.map((data, i) => ({
+  const distances = aiMoves.map((data, i) => ({
     index: i,
-    distance: euclideanDistance(board, data.board)
+    distance: euclideanDistance(board, data.board),
   })).sort((a, b) => a.distance - b.distance);
 
   const neighbors = distances.slice(0, k)
-    .map(n => jogadasIA[n.index].move)
-    .filter(m => board[m] === 0);
+    .map((n) => aiMoves[n.index].move)
+    .filter((m) => board[m] === 0);
 
   if (neighbors.length === 0) {
-    const empty = board.map((v, i) => v === 0 ? i : -1).filter(i => i !== -1);
+    const empty = board.map((v, i) => (v === 0 ? i : -1)).filter((i) => i !== -1);
     return empty[Math.floor(Math.random() * empty.length)];
   }
 
@@ -70,39 +70,39 @@ function getBestMove(board, k = 3) {
     return acc;
   }, {});
 
-  return parseInt(Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b));
+  return parseInt(Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b)));
 }
 
 function updateProgress() {
-  aprendizado = Math.min(100, Math.round((jogadasIA.length / 20) * 100));
+  learningLevel = Math.min(100, Math.round((aiMoves.length / 20) * 100));
 
-  const jogadasDaPartida = jogadasIA.slice(-movimentosDaPartida);
-  const jogadasKNN = jogadasDaPartida.filter(j => j.viaKNN).length;
+  const movesOfLastGame = aiMoves.slice(-movesThisGame);
+  const knnMovesCount = movesOfLastGame.filter((j) => j.viaKNN).length;
 
-  if (movimentosDaPartida > 0) {
-    historicoProgresso.push({
-      aprendizado,
-      movimentos: movimentosDaPartida,
-      jogadasKNN,
-      jogadasIA: [...jogadasDaIAPartida]
+  if (movesThisGame > 0) {
+    progressHistory.push({
+      learningLevel: learningLevel,
+      moves: movesThisGame,
+      knnMovesCount: knnMovesCount,
+      aiMoves: [...aiMovesThisGame],
     });
   }
 
-  localStorage.setItem("knn_dataset", JSON.stringify(jogadasIA));
-  localStorage.setItem("knn_progresso", JSON.stringify(historicoProgresso));
+  localStorage.setItem("knn_dataset", JSON.stringify(aiMoves));
+  localStorage.setItem("knn_progresso", JSON.stringify(progressHistory));
 
   const bar = document.getElementById('intelligenceBar');
-  bar.style.width = aprendizado + '%';
-  bar.textContent = aprendizado + '%';
+  bar.style.width = learningLevel + '%';
+  bar.textContent = learningLevel + '%';
 
   const feedback = document.getElementById('message');
-  if (aprendizado < 30) {
+  if (learningLevel < 30) {
     feedback.textContent = "Vovó é leiga.";
-  } else if (aprendizado < 50) {
+  } else if (learningLevel < 50) {
     feedback.textContent = "Vovó está começando a entender seus padrões...";
-  } else if (aprendizado < 75) {
+  } else if (learningLevel < 75) {
     feedback.textContent = "Ela já consegue antecipar seus movimentos.";
-  } else if (aprendizado < 100) {
+  } else if (learningLevel < 100) {
     feedback.textContent = "Quase uma profissional!";
   } else {
     feedback.textContent = "Duvido você ganhar...";
@@ -113,101 +113,114 @@ function makeMove(index) {
   if (board[index] !== 0) return;
   board[index] = 1;
   renderBoard();
-  hideEndElements(); // 👈 Esconde elementos no início da jogada
+  hideEndElements();
+  scrollToBoard(); 
 
   if (checkWin(1)) return endGame('Você venceu!');
-  if (board.every(v => v !== 0)) return endGame('Empate!');
+  if (board.every((v) => v !== 0)) return endGame('Empate!');
 
   setTimeout(() => {
-    const foiViaKNN = jogadasIA.length >= 5;
+    const wasViaKnn = aiMoves.length >= 5;
     const move = getBestMove(board);
     board[move] = -1;
-    jogadasIA.push({ board: [...board], move, viaKNN: foiViaKNN });
-    jogadasDaIAPartida.push(move);
-    movimentosDaPartida++;
+    aiMoves.push({ board: [...board], move, viaKNN: wasViaKnn });
+    aiMovesThisGame.push(move);
+    movesThisGame++;
     updateProgress();
     renderBoard();
     if (checkWin(-1)) return endGame('Vovó venceu!');
-    if (board.every(v => v !== 0)) return endGame('Empate!');
+    if (board.every((v) => v !== 0)) return endGame('Empate!');
   }, 500);
 }
 
 function checkWin(player) {
-  return winningCombos.some(combo => combo.every(i => board[i] === player));
+  return winningCombos.some((combo) => combo.every((i) => board[i] === player));
 }
 
-function fazerScrollParaOBotao() {
-  const botaoJogar = document.getElementById('resetBtn');
-
-  // Rola a tela suavemente até o botão
-  if (botaoJogar) {
-    // Usamos um pequeno timeout para garantir que o botão já está visível na tela
+function scrollToButton() {
+  const playButton = document.getElementById('resetBtn');
+  if (playButton) {
     setTimeout(() => {
-      botaoJogar.scrollIntoView({
-        behavior: 'smooth', // Animação de rolagem
-        block: 'center'     // Alinha o botão ao centro
+      playButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
       });
-    }, 100); // 100 milissegundos de espera
+    }, 100);
+  }
+}
+
+function scrollToBoard() {
+  const boardElement = document.getElementById('board');
+  if (boardElement) {
+    boardElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
   }
 }
 
 function endGame(message) {
   document.getElementById('message').textContent = message;
-  document.querySelectorAll('.cell').forEach(cell => cell.onclick = null);
+  document.querySelectorAll('.cell').forEach((cell) => (cell.onclick = null));
   document.getElementById('resetBtn').style.display = 'inline-block';
   document.getElementById('resetLearningBtn').style.display = 'inline-block';
   document.getElementById('toggleChart').style.display = 'block';
-  
-  // --- Adicione o código para o texto aqui ---
-  const statsText = document.getElementById('statsText'); 
-  if (statsText) {                                        
-    statsText.style.display = 'block';                    
-  }                                                      
-  // ---------------------------------------------
 
-  gerarGraficoIA();
-  movimentosDaPartida = 0;
-
-  const imgIA = document.getElementById('velhinha');
-  if (message.includes("Você venceu!")) {
-    imgIA.src = "velhinhaperde.png";
-  } else if (message.includes("Vovó venceu!")) {
-    imgIA.src = "velhinhaganha.png";
-  } else {
-    imgIA.src = "velhinha.png";
+  const statsText = document.getElementById('statsText');
+  if (statsText) {
+    statsText.style.display = 'block';
   }
 
-  fazerScrollParaOBotao(); 
+  renderChart();
+  movesThisGame = 0;
+
+  const aiMascot = document.getElementById('velhinha');
+  if (message.includes("Você venceu!")) {
+    aiMascot.src = "velhinhaperde.png";
+  } else if (message.includes("Vovó venceu!")) {
+    aiMascot.src = "velhinhaganha.png";
+  } else {
+    aiMascot.src = "velhinha.png";
+  }
+
+  scrollToButton();
 }
 
 function resetGame() {
   board = Array(9).fill(0);
-  movimentosDaPartida = 0;
-  jogadasDaIAPartida = [];
-  document.getElementById('message').textContent = '';
+  movesThisGame = 0;
+  aiMovesThisGame = [];
+  
+  // mensagem de início de partida
+  document.getElementById('message').textContent = "Faça sua jogada.";
+  
   document.getElementById('velhinha').src = "velhinha.png";
   document.getElementById('chartContainer').classList.remove('show');
   document.getElementById('toggleChart').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
-  document.getElementById('resetLearningBtn').style.display = 'none';
-
-  const statsText = document.getElementById('statsText'); 
-  if (statsText) {                                        
-    statsText.style.display = 'none';                     
-  }                                                       
+  
+  const statsText = document.getElementById('statsText');
+  if (statsText) {
+    statsText.style.display = 'none';
+  }
 
   renderBoard();
+  scrollToBoard();
 }
 
+// CÓDIGO ATUALIZADO
 function resetLearning() {
   localStorage.removeItem("knn_dataset");
   localStorage.removeItem("knn_progresso");
-  jogadasIA = [];
-  historicoProgresso = [];
-  aprendizado = 0;
+  aiMoves = [];
+  progressHistory = [];
+  learningLevel = 0;
   updateProgress();
-  gerarGraficoIA();
+  renderChart();
   resetGame();
+
+  // mensagem de feedback após resetar
+  document.getElementById('message').textContent = "Memória da Vovó reiniciada. Uma nova aluna!";
 }
 
 function toggleChartVisibility() {
@@ -235,23 +248,25 @@ function hideEndElements() {
   document.getElementById('chartContainer').classList.remove('show');
 }
 
-function gerarGraficoIA() {
-  const ctx = document.getElementById('chartIA');
-  if (chartInstance !== null) chartInstance.destroy();
+function renderChart() {
+  const ctx = document.getElementById('chartIA').getContext('2d');
+  if (chartInstance !== null) {
+    chartInstance.destroy();
+  }
 
-  const labels = historicoProgresso.map((_, i) => `Jogada ${i + 1}`);
-  const dadosAprendizado = historicoProgresso.map(entry => entry.aprendizado);
-  const dadosDataset = historicoProgresso.map((_, i) => Math.min(i + 1, jogadasIA.length));
-  const dadosKNN = historicoProgresso.map(entry => entry.jogadasKNN || 0);
+  const chartLabels = progressHistory.map((_, i) => `Partida ${i + 1}`);
+  const learningData = progressHistory.map((entry) => entry.learningLevel);
+  const datasetSizeData = progressHistory.map((_, i) => Math.min(i + 1, aiMoves.length));
+  const knnMovesData = progressHistory.map((entry) => entry.knnMovesCount || 0);
 
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels,
+      labels: chartLabels,
       datasets: [
         {
           label: 'Evolução da IA (%)',
-          data: dadosAprendizado,
+          data: learningData,
           borderColor: '#00da91ff',
           backgroundColor: 'rgba(127, 255, 212, 0.2)',
           tension: 0.2,
@@ -260,7 +275,7 @@ function gerarGraficoIA() {
         },
         {
           label: 'Tamanho do dataset KNN',
-          data: dadosDataset,
+          data: datasetSizeData,
           borderColor: '#ffa07a',
           backgroundColor: 'rgba(255, 160, 122, 0.2)',
           tension: 0.3,
@@ -269,7 +284,7 @@ function gerarGraficoIA() {
         },
         {
           label: 'Jogadas feitas via KNN',
-          data: dadosKNN,
+          data: knnMovesData,
           borderColor: '#87cefa',
           backgroundColor: 'rgba(135, 206, 250, 0.2)',
           tension: 0.3,
@@ -284,14 +299,14 @@ function gerarGraficoIA() {
         tooltip: {
           callbacks: {
             label: function (context) {
-              const partida = historicoProgresso[context.dataIndex];
+              const gameEntry = progressHistory[context.dataIndex];
               if (context.dataset.label === 'Evolução da IA (%)') {
-                return `Aprendizado: ${partida.aprendizado}% | Jogadas conhecidas: ${partida.movimentos}`;
+                return `Aprendizado: ${gameEntry.learningLevel}% | Jogadas conhecidas: ${gameEntry.moves}`;
               } else if (context.dataset.label === 'Jogadas feitas via KNN') {
-                return `Jogadas via KNN: ${partida.jogadasKNN || 0}`;
+                return `Jogadas via KNN: ${gameEntry.knnMovesCount || 0}`;
               } else {
-                const jogadas = partida.jogadasIA ? partida.jogadasIA.join(', ') : '-';
-                return `Casas jogadas pela IA: ${jogadas}`;
+                const moves = gameEntry.aiMoves ? gameEntry.aiMoves.join(', ') : '-';
+                return `Casas jogadas pela IA: ${moves}`;
               }
             }
           }
@@ -322,13 +337,13 @@ function gerarGraficoIA() {
   });
 
   if (!document.getElementById('explicacaoKNN')) {
-    const explicacao = document.createElement('p');
-    explicacao.id = 'explicacaoKNN';
-    explicacao.style.textAlign = 'center';
-    explicacao.style.color = '#000';
-    explicacao.style.marginTop = '10px';
-    explicacao.textContent = 'A IA usa KNN para prever seus próximos movimentos. Quanto mais partidas ela joga, mais dados ela tem para melhorar suas decisões.';
-    document.getElementById('chartContainer').appendChild(explicacao);
+    const explanation = document.createElement('p');
+    explanation.id = 'explicacaoKNN';
+    explanation.style.textAlign = 'center';
+    explanation.style.color = '#000';
+    explanation.style.marginTop = '10px';
+    explanation.textContent = 'A IA usa KNN para prever seus próximos movimentos. Quanto mais partidas ela joga, mais dados ela tem para melhorar suas decisões.';
+    document.getElementById('chartContainer').appendChild(explanation);
   }
 }
 
@@ -348,4 +363,6 @@ window.onload = () => {
   renderBoard();
   updateProgress();
   hideEndElements();
+  //Mensagem inicial de boas-vindas
+  document.getElementById('message').textContent = "Que tal uma partida?"
 };

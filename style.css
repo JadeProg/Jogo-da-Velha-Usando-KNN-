@@ -108,11 +108,26 @@ p.description {
   transform: scale(1.05);
 }
 
+/* ESTILO DA MENSAGEM*/
 #message {
-  font-size: 1.5rem;
-  margin: 15px 0;
-  color: #000;
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.2rem;
   font-weight: bold;
+  color: #111;
+  line-height: 1.4;
+  
+  /* Mantém a estabilidade do layout para não empurrar o tabuleiro */
+  min-height: 4.5em; /* <-- AUMENTADO DE 3.5em PARA 5em */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Linhas para corrigir a quebra de linha */
+  width: 100%; 
+  max-width: 450px;
+  margin: 0 auto 15px auto; 
+  padding: 15px 20px;
+  box-sizing: border-box;
 }
 
 /* Botão de Jogar revertido ao estado original */
@@ -208,10 +223,6 @@ p.description {
     background-color: #fafafa;
     border-radius: 12px;
     max-height: 800px;
-  }
-
-  #message {
-    font-size: 1.2rem;
   }
 
   h1 {
