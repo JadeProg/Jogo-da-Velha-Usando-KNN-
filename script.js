@@ -11,6 +11,7 @@ let chartInstance = null;
 let movesThisGame = 0;
 let learningLevel = 0;
 let aiMovesThisGame = [];
+let isPlayerTurn = true; // <-- CONTROLE DE TURNO ADICIONADO
 
 function euclideanDistance(a, b) {
   return Math.sqrt(a.reduce((sum, val, i) => sum + (val - b[i]) ** 2, 0));
@@ -27,20 +28,62 @@ function checkThreat(board, player) {
   return null;
 }
 
+/**
+ * LÓGICA DA IA ATUALIZADA
+ * Adiciona uma tática de abertura específica contra jogadas no centro.
+ */
 function getBestMove(board, k = 3) {
-  const isFirstPlay = board.filter((v) => v !== 0).length === 1;
-  if (isFirstPlay && board[4] === 0 && learningLevel >= 100) return 4;
-
+  // --- Estratégia "Perfeita" e Adaptativa (quando learningLevel >= 100) ---
   if (learningLevel >= 100) {
+    // 1. Vencer: Prioridade máxima e inegociável.
     const winMove = checkThreat(board, -1);
     if (winMove !== null) return winMove;
+
+    // 2. Bloquear: Segunda maior prioridade. Essencial para não perder.
     const blockMove = checkThreat(board, 1);
     if (blockMove !== null) return blockMove;
+
+    // Define constantes para clareza na lógica estratégica
+    const corners = [0, 2, 6, 8];
+    const sides = [1, 3, 5, 7];
+    const movesMade = board.filter(cell => cell !== 0).length;
+
+    // 3. NOVA TÁTICA DE ABERTURA: Responder ao oponente começando no centro.
+    // Se for a primeira jogada da IA (total de 1 jogada no tabuleiro) e o oponente pegou o centro,
+    // a IA joga em um canto para começar a "encurralar" e controlar o jogo.
+    if (movesMade === 1 && board[4] === 1) {
+      const availableCorners = corners.filter(i => board[i] === 0);
+      return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+    }
+
+    // 4. Centro: Se a tática acima não se aplica e o centro está livre, a IA o pega.
     if (board[4] === 0) return 4;
-    const corners = [0, 2, 6, 8].filter((i) => board[i] === 0);
-    if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
+
+    // 5. TÁTICA DE CONTRA-ATAQUE: Responder a jogadas de canto do oponente.
+    // Se o oponente tenta uma armadilha com 2 cantos, a IA reage jogando nos lados.
+    const opponentCornersCount = corners.filter(i => board[i] === 1).length;
+    if (opponentCornersCount >= 2) {
+      const availableSides = sides.filter(i => board[i] === 0);
+      if (availableSides.length > 0) {
+        return availableSides[Math.floor(Math.random() * availableSides.length)];
+      }
+    }
+
+    // 6. ESTRATÉGIA PADRÃO: Priorizar os cantos, que são as posições mais fortes.
+    const availableCorners = corners.filter(i => board[i] === 0);
+    if (availableCorners.length > 0) {
+      return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+    }
+
+    // 7. ÚLTIMO RECURSO: Jogar nos lados restantes.
+    const availableSides = sides.filter(i => board[i] === 0);
+    if (availableSides.length > 0) {
+      return availableSides[Math.floor(Math.random() * availableSides.length)];
+    }
   }
 
+  // --- Lógica de Aprendizado (KNN para < 100%) ---
+  // Esta parte continua a mesma.
   if (aiMoves.length >= 5) {
     const block = checkThreat(board, 1);
     if (block !== null) return block;
@@ -72,6 +115,7 @@ function getBestMove(board, k = 3) {
 
   return parseInt(Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b)));
 }
+
 
 function updateProgress() {
   learningLevel = Math.min(100, Math.round((aiMoves.length / 20) * 100));
@@ -109,15 +153,27 @@ function updateProgress() {
   }
 }
 
+// =========================================================
+// FUNÇÃO makeMove TOTALMENTE ATUALIZADA
+// =========================================================
 function makeMove(index) {
-  if (board[index] !== 0) return;
+  // Se não for a vez do jogador ou a casa já estiver ocupada, não faz nada.
+  if (!isPlayerTurn || board[index] !== 0) return;
+
+  isPlayerTurn = false; // Trava o tabuleiro para o jogador
   board[index] = 1;
   renderBoard();
   hideEndElements();
-  scrollToBoard(); 
+  scrollToBoard();
 
-  if (checkWin(1)) return endGame('Você venceu!');
-  if (board.every((v) => v !== 0)) return endGame('Empate!');
+  if (checkWin(1)) {
+    endGame('Você venceu!');
+    return; // Encerra a função aqui se o jogador vencer
+  }
+  if (board.every((v) => v !== 0)) {
+    endGame('Empate!');
+    return; // Encerra a função aqui se der empate
+  }
 
   setTimeout(() => {
     const wasViaKnn = aiMoves.length >= 5;
@@ -128,8 +184,12 @@ function makeMove(index) {
     movesThisGame++;
     updateProgress();
     renderBoard();
+
     if (checkWin(-1)) return endGame('Vovó venceu!');
     if (board.every((v) => v !== 0)) return endGame('Empate!');
+    
+    // Se o jogo continuar, devolve a vez para o jogador
+    isPlayerTurn = true;
   }, 500);
 }
 
@@ -176,29 +236,31 @@ function endGame(message) {
 
   const aiMascot = document.getElementById('velhinha');
   if (message.includes("Você venceu!")) {
-    aiMascot.src = "velhinhaperde.png";
+    aiMascot.src = "img/velhinhaperde.png";
   } else if (message.includes("Vovó venceu!")) {
-    aiMascot.src = "velhinhaganha.png";
+    aiMascot.src = "img/velhinhaganha.png";
   } else {
-    aiMascot.src = "velhinha.png";
+    aiMascot.src = "img/velhinha.png";
   }
 
   scrollToButton();
 }
 
+// =========================================================
+// FUNÇÃO resetGame ATUALIZADA
+// =========================================================
 function resetGame() {
   board = Array(9).fill(0);
   movesThisGame = 0;
   aiMovesThisGame = [];
-  
-  // mensagem de início de partida
+  isPlayerTurn = true; // Garante que o jogador pode começar
+
   document.getElementById('message').textContent = "Faça sua jogada.";
-  
-  document.getElementById('velhinha').src = "velhinha.png";
+  document.getElementById('velhinha').src = "img/velhinha.png";
   document.getElementById('chartContainer').classList.remove('show');
   document.getElementById('toggleChart').style.display = 'none';
   document.getElementById('resetBtn').style.display = 'none';
-  
+
   const statsText = document.getElementById('statsText');
   if (statsText) {
     statsText.style.display = 'none';
@@ -208,7 +270,6 @@ function resetGame() {
   scrollToBoard();
 }
 
-// CÓDIGO ATUALIZADO
 function resetLearning() {
   localStorage.removeItem("knn_dataset");
   localStorage.removeItem("knn_progresso");
@@ -219,7 +280,6 @@ function resetLearning() {
   renderChart();
   resetGame();
 
-  // mensagem de feedback após resetar
   document.getElementById('message').textContent = "Memória da Vovó reiniciada. Uma nova aluna!";
 }
 
@@ -363,6 +423,5 @@ window.onload = () => {
   renderBoard();
   updateProgress();
   hideEndElements();
-  //Mensagem inicial de boas-vindas
-  document.getElementById('message').textContent = "Que tal uma partida?"
+  document.getElementById('message').textContent = "Que tal uma partida?";
 };
