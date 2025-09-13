@@ -10,7 +10,7 @@ A cada partida, a "Vovó" vai evoluindo sua estratégia usando um modelo de apre
 
 ---
 
-## ✨ Funcionalidades
+## 🛠 Funcionalidades
 - ✔️ Tabuleiro de 3x3 com jogabilidade simples.  
 - ✔️ IA adaptativa: aprende a cada partida e armazena suas jogadas no navegador (localStorage).  
 - ✔️ Barra de progresso mostrando o nível de aprendizado da IA.  
@@ -44,7 +44,7 @@ Entenda mais em meu post: 👵 [Desvenda o cérebro da Vovó.](https://www.insta
 
 ---
 
-## 🔬 Como funciona a lógica da IA
+## 🤖 Como funciona a lógica da IA
 
 A IA do jogo foi implementada em **JavaScript puro (Vanilla JS)** e combina duas estratégias:
 
@@ -62,7 +62,7 @@ A IA do jogo foi implementada em **JavaScript puro (Vanilla JS)** e combina duas
 
 ---
 
-### 📊 Visualização do aprendizado
+### 📈 Visualização do aprendizado
 - O gráfico é construído com **Chart.js** (`renderChart()`).
 - Ele mostra:
   - Evolução do aprendizado em %.
@@ -72,7 +72,7 @@ A IA do jogo foi implementada em **JavaScript puro (Vanilla JS)** e combina duas
 
 ---
 
-### ⚡ Outras funções principais
+### 🔧 Outras funções principais
 - `makeMove(index)` → executa a jogada do jogador e da IA.  
 - `resetGame()` → reinicia o tabuleiro.  
 - `resetLearning()` → apaga o dataset e "zera" a memória da Vovó.  
