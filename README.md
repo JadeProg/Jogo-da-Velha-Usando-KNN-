@@ -89,10 +89,7 @@ Se você deseja **alterar o código** ou estudar a lógica da IA, siga estes pas
    git clone https://github.com/JadeProg/Jogo-da-Velha-Usando-KNN.git
 
 2. Abra o arquivo index.html em qualquer navegador moderno.
-3. (Opcional) Rode em um servidor local:
-   ```bash
-   python -m http.server
-   Depois acesse http://localhost:8000
+
 
 ## 📂 Estrutura do projeto
 ```bash
