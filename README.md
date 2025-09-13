@@ -1,7 +1,7 @@
 <h1 align="center"> X|0 [memória de máquina]</h1>
 
 <p align="center">
-  <img src="jogo-da-velha/img/jogodavelha.jpg" alt="Velhinha IA" width="400"/>
+  <img src="jogo-da-velha/img/jogodavelha.gif" alt="Velhinha IA" width="400"/>
 </p>
 
 
