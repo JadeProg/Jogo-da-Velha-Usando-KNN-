@@ -1,5 +1,9 @@
 # 🎮 X|0 [memória de máquina]
-![Velhinha IA](jogo-da-velha/img/jogodavelha.jpg)
+
+<p align="center">
+  <img src="jogo-da-velha/img/jogodavelha.jpg" alt="Velhinha IA" width="400"/>
+</p>
+
 
 Um jogo da velha interativo onde você joga contra uma **IA que aprende com você**.  
 A cada partida, a "Vovó" vai evoluindo sua estratégia usando um modelo de aprendizado baseado em **KNN (K-Nearest Neighbors)**.
