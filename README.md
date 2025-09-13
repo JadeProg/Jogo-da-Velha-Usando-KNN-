@@ -50,4 +50,6 @@ jogo-da-velha/
     ├── velhinha.png
     ├── velhinhaganha.png
     ├── velhinhaperde.png
-    └── reiniciar.png
+    ├── reiniciar.png
+    └── jogodavelha.jpg
+
