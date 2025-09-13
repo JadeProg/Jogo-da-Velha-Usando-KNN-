@@ -87,7 +87,6 @@ Se você deseja **alterar o código** ou estudar a lógica da IA, siga estes pas
 1. **Clone este repositório** (ou baixe o ZIP):
    ```bash
    git clone https://github.com/JadeProg/Jogo-da-Velha-Usando-KNN.git
-   cd Jogo-da-Velha-Usando-KNN/jogo-da-velha
 
 2. Abra o arquivo index.html em qualquer navegador moderno.
 3. (Opcional) Rode em um servidor local:
