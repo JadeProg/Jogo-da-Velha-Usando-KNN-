@@ -40,6 +40,57 @@ Entenda mais em meu post: 👵 [Desvenda o cérebro da Vovó.](https://www.insta
 
 ---
 
+## 🔬 Como funciona a lógica da IA
+
+A IA do jogo foi implementada em **JavaScript puro (Vanilla JS)** e combina duas estratégias:
+
+1. **Aprendizado com KNN (K-Nearest Neighbors):**
+   - A cada jogada, o estado do tabuleiro (`board`) é salvo no navegador (via `localStorage`).
+   - Esses estados formam um dataset chamado `knn_dataset`.
+   - Quando a IA precisa decidir um movimento, ela compara o tabuleiro atual com os anteriores, usando **distância euclidiana** para achar as jogadas mais parecidas.
+   - Quanto mais partidas jogadas → mais dados → IA melhora suas previsões.
+
+2. **Estratégia perfeita (quando `learningLevel >= 100`):**
+   - Se pode vencer, vence.
+   - Se o jogador pode vencer, bloqueia.
+   - Prefere **cantos** e **centro** para dominar o jogo.
+   - Tem táticas de abertura e contra-ataque.
+
+---
+
+### 📊 Visualização do aprendizado
+- O gráfico é construído com **Chart.js** (`renderChart()`).
+- Ele mostra:
+  - Evolução do aprendizado em %.
+  - Tamanho do dataset (quantos estados a IA conhece).
+  - Jogadas feitas via KNN.
+- O gráfico pode ser expandido ou escondido clicando em "Ver Estatísticas".
+
+---
+
+### ⚡ Outras funções principais
+- `makeMove(index)` → executa a jogada do jogador e da IA.  
+- `resetGame()` → reinicia o tabuleiro.  
+- `resetLearning()` → apaga o dataset e "zera" a memória da Vovó.  
+- `checkThreat(board, player)` → verifica se há chance de vitória ou bloqueio.  
+- `renderBoard()` → desenha o tabuleiro dinamicamente.  
+
+
+## 📥 Instalação para desenvolvedores
+
+Se você deseja **alterar o código** ou estudar a lógica da IA, siga estes passos:
+
+1. **Clone este repositório** (ou baixe o ZIP):
+   ```bash
+   git clone https://github.com/JadeProg/Jogo-da-Velha-Usando-KNN.git
+   cd Jogo-da-Velha-Usando-KNN/jogo-da-velha
+
+2. Abra o arquivo index.html em qualquer navegador moderno.
+3. (Opcional) Rode em um servidor local:
+   ```bash
+   python -m http.server
+   Depois acesse http://localhost:8000
+
 ## 📂 Estrutura do projeto
 ```bash
 jogo-da-velha/
